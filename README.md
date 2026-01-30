@@ -1,0 +1,1 @@
+##This project aims to create an AI agent capable of comparing a résumé and a LinkedIn profile in order to determine their compatibility. It will help our community optimize their profiles and find their dream job as soon as possible.
