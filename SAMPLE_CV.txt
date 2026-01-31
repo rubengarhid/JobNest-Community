@@ -1,0 +1,137 @@
+# Sample CV Text for Testing
+
+Use this example CV text to test the application:
+
+---
+
+JOHN DOE
+Senior Software Engineer
+Email: john.doe@email.com | Phone: +1-234-567-8900
+LinkedIn: linkedin.com/in/johndoe | GitHub: github.com/johndoe
+
+PROFESSIONAL SUMMARY
+Experienced software engineer with 8+ years of expertise in full-stack development, 
+cloud infrastructure, and team leadership. Passionate about building scalable 
+applications and mentoring junior developers.
+
+WORK EXPERIENCE
+
+Senior Software Engineer | Tech Corp Inc.
+San Francisco, CA | January 2020 - Present
+- Led development team of 5 engineers building cloud-native applications
+- Architected and deployed microservices using Python, FastAPI, and Docker
+- Implemented CI/CD pipelines reducing deployment time by 60%
+- Mentored 3 junior developers, improving team productivity by 40%
+- Technologies: Python, JavaScript, React, AWS, Docker, Kubernetes
+
+Software Engineer | Digital Solutions LLC
+Seattle, WA | June 2016 - December 2019
+- Developed full-stack web applications using Python Django and React
+- Integrated third-party APIs and payment systems (Stripe, PayPal)
+- Optimized database queries reducing response time by 50%
+- Collaborated with cross-functional teams in Agile environment
+- Technologies: Python, Django, JavaScript, PostgreSQL, Redis
+
+Junior Developer | StartupXYZ
+Portland, OR | July 2014 - May 2016
+- Built RESTful APIs and backend services using Python Flask
+- Developed responsive front-end interfaces with HTML, CSS, JavaScript
+- Participated in code reviews and sprint planning sessions
+- Technologies: Python, Flask, MySQL, Git
+
+SKILLS
+
+Programming Languages: Python, JavaScript, TypeScript, Java, SQL
+Web Frameworks: FastAPI, Django, Flask, React, Angular, Node.js
+Cloud & DevOps: AWS (EC2, S3, Lambda, RDS), Docker, Kubernetes, Jenkins, CI/CD
+Databases: PostgreSQL, MySQL, MongoDB, Redis
+Tools & Technologies: Git, Agile/Scrum, RESTful APIs, Microservices, TDD
+Soft Skills: Team Leadership, Mentoring, Problem Solving, Communication
+
+EDUCATION
+
+Bachelor of Science in Computer Science
+University of California, Berkeley
+Graduated: May 2014
+GPA: 3.7/4.0
+
+Relevant Coursework: Data Structures, Algorithms, Database Systems, 
+Software Engineering, Machine Learning, Cloud Computing
+
+CERTIFICATIONS
+- AWS Certified Solutions Architect - Associate (2021)
+- Certified ScrumMaster (CSM) (2020)
+
+PROJECTS
+
+E-commerce Platform | Personal Project
+- Built full-stack e-commerce platform using Python, FastAPI, React
+- Implemented user authentication, product catalog, and payment integration
+- Deployed on AWS with auto-scaling and load balancing
+- GitHub: github.com/johndoe/ecommerce-platform
+
+LANGUAGES
+- English: Native
+- Spanish: Intermediate
+
+---
+
+Sample LinkedIn Profile Text:
+
+EXPERIENCE
+
+Senior Software Engineer
+Tech Corp Inc. · Full-time
+Jan 2020 - Present · 4 yrs
+San Francisco, California
+Leading a talented team of 5 engineers in developing cutting-edge cloud applications.
+Key achievements:
+- Built microservices architecture using Python and FastAPI
+- Deployed containerized applications on AWS using Docker and Kubernetes
+- Established CI/CD pipelines that improved deployment efficiency
+- Mentoring junior developers and conducting technical interviews
+Skills: Python · JavaScript · React · AWS · Docker · Kubernetes · FastAPI
+
+Software Engineer
+Digital Solutions LLC · Full-time
+Jun 2016 - Dec 2019 · 3 yrs 7 mos
+Seattle, Washington
+Full-stack development role focusing on web applications and APIs.
+- Developed applications using Python Django and React
+- Integrated payment gateways and third-party services
+- Database optimization and performance tuning
+- Agile methodology and sprint-based development
+Skills: Python · Django · JavaScript · React · PostgreSQL · Agile
+
+Junior Developer
+StartupXYZ · Full-time
+Jul 2014 - May 2016 · 1 yr 11 mos
+Portland, Oregon
+Entry-level position building web services and APIs.
+- Backend development with Python Flask
+- Front-end development with JavaScript
+- API development and testing
+Skills: Python · Flask · JavaScript · MySQL
+
+EDUCATION
+
+University of California, Berkeley
+Bachelor of Science - BS, Computer Science
+2010 - 2014
+Grade: 3.7
+
+LICENSES & CERTIFICATIONS
+
+AWS Certified Solutions Architect - Associate
+Amazon Web Services (AWS)
+Issued Jan 2021
+
+Certified ScrumMaster (CSM)
+Scrum Alliance
+Issued Jun 2020
+
+SKILLS
+
+Python · JavaScript · React · AWS · Docker · Kubernetes · FastAPI · Django · 
+Flask · PostgreSQL · MySQL · MongoDB · Node.js · TypeScript · Git · Agile · 
+Microservices · RESTful APIs · CI/CD · Jenkins
