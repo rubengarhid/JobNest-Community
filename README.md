@@ -111,7 +111,7 @@ Or use the test scripts:
    - Skills comparison
    - Recommendations
 
-## 🔍 API Endpoints
+##  API Endpoints
 
 ### `POST /compare`
 Compare CV with LinkedIn profile
@@ -151,7 +151,7 @@ Parse LinkedIn text only (testing endpoint)
 ### `GET /health`
 Health check endpoint
 
-## 🧠 Technology Stack
+## Technology Stack
 
 ### Backend
 - **FastAPI**: Modern web framework for APIs
@@ -169,8 +169,8 @@ Health check endpoint
 - ✅ **100% Local Processing**: All AI models run on your machine
 - ✅ **No External API Calls**: No data sent to third parties
 - ✅ **No Rate Limits**: Process unlimited comparisons
-
-## 📊 Score Interpretation
+- 
+##  Score Interpretation
 
 | Score | Meaning | Icon |
 |-------|---------|------|
@@ -178,14 +178,14 @@ Health check endpoint
 | 60-79% | Good match - minor improvements suggested | ⚠️ |
 | 0-59% | Needs improvement - significant differences | ❌ |
 
-## 🎯 Section Weights
+##  Section Weights
 
 The overall score is calculated as a weighted average:
 - **Experience**: 40%
 - **Skills**: 35%
 - **Education**: 25%
 
-## 🔧 Configuration
+##  Configuration
 
 ### Model Selection
 Edit `backend/comparator.py` to use a different model:
@@ -205,7 +205,7 @@ self.section_weights = {
 }
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Backend won't start
 ```bash
@@ -227,14 +227,14 @@ python -c "from sentence_transformers import SentenceTransformer; SentenceTransf
 - Try converting to DOCX first
 - Check if PDF has selectable text (not scanned image)
 
-## 📝 Limitations
+##  Limitations
 
 - **Parsing accuracy**: Works best with well-formatted CVs with clear section headers
 - **Skills detection**: Limited to predefined skill keywords (expandable)
 - **Language**: Optimized for English (some Spanish support)
 - **File size**: Large files (>10MB) may take longer to process
 
-## 🚀 Future Enhancements
+##  Future Enhancements
 
 - [ ] Multi-language support
 - [ ] Custom skill dictionaries
@@ -244,11 +244,11 @@ python -c "from sentence_transformers import SentenceTransformer; SentenceTransf
 - [ ] Integration with LinkedIn API
 - [ ] Advanced NLP for better section detection
 
-## 📄 License
+##  License
 
 MIT License - Feel free to use and modify
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions welcome! Please:
 1. Fork the repository
@@ -256,11 +256,11 @@ Contributions welcome! Please:
 3. Add tests for new features
 4. Submit a pull request
 
-## 📧 Support
+##  Support
 
 For issues or questions, please open an issue on GitHub.
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - [Sentence Transformers](https://www.sbert.net/) - Semantic similarity
 - [FastAPI](https://fastapi.tiangolo.com/) - Web framework
@@ -269,4 +269,4 @@ For issues or questions, please open an issue on GitHub.
 
 ---
 
-**Built with ❤️ for job seekers and professionals maintaining consistent online presence**
+
