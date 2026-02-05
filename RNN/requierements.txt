@@ -1,0 +1,9 @@
+pandas
+numpy
+pdfplumber
+scikit-learn
+matplotlib
+tensorflow
+fastapi
+uvicorn
+python-multipart
