@@ -1,0 +1,55 @@
+Category,Role,Keywords,Skills,KPI,Tools
+Sales,SDR,"inbound, qualification, SQL, discovery, nurturing, demos","qualification, communication, CRM","SQLs, demo rate, conversion rate","HubSpot, Salesforce"
+Sales,AE,"closing, ARR, revenue, sales cycle, negotiation, quota, forecasting","negotiation, storytelling, strategy","ARR, win rate, quota attainment","Salesforce, Gong, Zoom"
+Sales,AM,"retention, renewals, expansion, churn, NRR, upsell","relationship mgmt, account strategy","NRR, churn, expansion revenue","Gainsight, Salesforce"
+Sales,Sales Manager,"coaching, forecasting, pipeline, performance","leadership, analytics","team quota, forecast accuracy",Salesforce
+Sales,RevOps,"revenue ops, forecasting, processes, automation","data analysis, systems thinking","revenue growth, efficiency","Salesforce, HubSpot, Tableau"
+Marketing,Marketing Manager,"brand, campaigns, positioning, GTM","strategy, leadership","CAC, MQLs","HubSpot, GA4"
+Marketing,Growth Marketer,"experimentation, funnels, CRO, growth loops","analytics, creativity","conversion rate, LTV/CAC","GA4, Mixpanel"
+Marketing,Performance Marketer,"paid ads, PPC, ROAS, funnels",data-driven thinking,"ROAS, CPA","Google Ads, Meta Ads"
+Marketing,Content Marketer,"content, SEO, storytelling, copywriting","writing, SEO","organic traffic, engagement","Ahrefs, SEMrush"
+Marketing,SEO Specialist,"keywords, ranking, backlinks, SERP",technical SEO,organic traffic,"Ahrefs, Screaming Frog"
+Marketing,Product Marketing,"positioning, messaging, personas",market analysis,"adoption, retention","Notion, Figma"
+Marketing,Community Manager,"community, engagement, social media",communication,engagement rate,"Discord, LinkedIn"
+Product,Product Manager,"roadmap, backlog, discovery, MVP, prioritization","strategic thinking, communication","feature adoption, retention","Jira, Productboard"
+Product,Product Owner,"backlog, user stories, agile",requirements mgmt,sprint velocity,Jira
+Product,UX Researcher,"user research, interviews, personas","empathy, analysis",insights generated,UserTesting
+Product,UX Designer,"UX, UI, wireframes, prototypes",design thinking,usability score,Figma
+Product,Product Analyst,"metrics, cohorts, funnels",data analysis,"retention, DAU/MAU","SQL, Amplitude"
+Engineering,Frontend Developer,"React, UI, performance, APIs","coding, debugging",deployment frequency,"GitHub, React"
+Engineering,Backend Developer,"APIs, databases, architecture",system design,"latency, uptime","Node, Python"
+Engineering,Full Stack Developer,"frontend, backend, databases",versatility,delivery speed,GitHub
+Engineering,Mobile Developer,"iOS, Android, apps",mobile dev,crash rate,"Swift, Kotlin"
+Engineering,DevOps Engineer,"CI/CD, cloud, infrastructure",automation,"uptime, MTTR","AWS, Docker"
+Engineering,QA Engineer,"testing, automation, bugs",attention to detail,defect rate,Selenium
+Engineering,Tech Lead,"architecture, mentoring, code quality",leadership,delivery predictability,GitHub
+Engineering,CTO,"technology strategy, scalability","leadership, vision",platform stability,Cloud platforms
+Customer Success,CSM,"onboarding, adoption, retention, NPS",relationship mgmt,"NRR, churn",Gainsight
+Customer Success,Support Agent,"tickets, troubleshooting, SLA",problem-solving,"CSAT, response time",Zendesk
+Customer Success,Implementation Manager,"onboarding, integration",project mgmt,time-to-value,Jira
+Customer Success,Head of CS,"retention strategy, scaling",leadership,"NRR, churn",CRM tools
+HR,Recruiter,"hiring, sourcing, interviews",communication,time-to-hire,LinkedIn Recruiter
+HR,HR Manager,"policies, culture, compliance",leadership,attrition rate,BambooHR
+HR,People Partner,"engagement, performance",coaching,engagement score,Lattice
+HR,L&D Specialist,"training, development",instructional design,training completion,LMS
+HR,Payroll Specialist,"payroll, compensation",accuracy,payroll errors,ADP
+Finance,CFO,"financial strategy, forecasting, capital",leadership,EBITDA,Excel
+Finance,Financial Analyst,"budgeting, forecasting, modeling",analytics,variance,"Excel, Power BI"
+Finance,Accountant,"accounting, reporting, compliance",precision,closing time,SAP
+Finance,FP&A,"planning, metrics, business insights",analysis,forecast accuracy,Excel
+Finance,AR/AP Specialist,"invoicing, collections",organization,DSO,ERP systems
+Data,Data Analyst,"SQL, dashboards, insights",analytics,data accuracy,"SQL, Tableau"
+Data,Data Scientist,"ML, models, predictions",statistics,model accuracy,Python
+Data,Analytics Engineer,"pipelines, transformation",data engineering,pipeline reliability,dbt
+Data,Head of Data,"data strategy, governance",leadership,data adoption,Snowflake
+Operations,Operations Manager,"processes, efficiency, scalability",optimization,cost reduction,Asana
+Operations,Business Operations,"strategy, execution",cross-functional thinking,OKRs,Notion
+Operations,Supply Chain Manager,"logistics, inventory",planning,lead time,ERP
+Operations,Project Manager,"timelines, scope, resources",organization,delivery rate,Jira
+Legal,Legal Counsel,"contracts, compliance, risk",legal expertise,contract cycle time,DocuSign
+Legal,Compliance Officer,"regulations, audits",attention to detail,compliance rate,GRC tools
+Legal,Paralegal,"documentation, research",organization,case turnaround,Legal software
+IT,IT Support,"troubleshooting, hardware, software",technical support,ticket resolution,ServiceNow
+IT,System Administrator,"networks, servers, security",infrastructure,uptime,Linux
+IT,Security Engineer,"cybersecurity, threat detection",risk management,incidents,SIEM tools
+IT,IT Manager,"IT strategy, systems",leadership,downtime,ITSM tools
