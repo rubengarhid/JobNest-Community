@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TalentAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#16161f;--border:rgba(255,255,255,0.06);--green:#6ee7b7;--indigo:#818cf8;--pink:#f472b6;--gold:#fbbf24;--text:#e2e8f0;--muted:#64748b;--sidebar:240px}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(110,231,183,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(110,231,183,0.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:relative;z-index:10;padding:0 0 20px}
+.logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.logo-inner{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--green),var(--indigo));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.logo-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;background:linear-gradient(135deg,var(--green),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-section{padding:8px 12px 4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;margin:1px 8px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--muted);transition:all .15s;text-decoration:none}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(110,231,183,0.1);color:var(--green)}
+.nav-item .icon{font-size:15px;width:18px;text-align:center}
+.agent-nav{display:flex;align-items:center;gap:10px;padding:8px 20px;margin:1px 8px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all .15s}
+.agent-nav:hover{background:var(--surface2);color:var(--text)}
+.agent-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.status-bar{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);font-size:12px}
+.status-label{color:var(--muted);margin-bottom:6px}
+.status-pills{display:flex;gap:4px;flex-wrap:wrap}
+.status-pill{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;position:relative;z-index:1}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(10,10,15,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid rgba(110,231,183,0.2)}
+.content{padding:28px 32px}
+.page{display:none}.page.active{display:block}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card:hover{border-color:rgba(110,231,183,0.2)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--green));opacity:.6}
+.stat-label{font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.stat-value{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--text);margin-bottom:6px;line-height:1;transition:all .3s}
+.stat-change{font-size:12px;color:var(--muted);font-weight:500}
+.stat-change.positive{color:var(--green)}
+
+/* AGENTS */
+.section-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.agents-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:28px}
+.agent-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.agent-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(to top,var(--glow,rgba(110,231,183,0.04)),transparent);pointer-events:none}
+.agent-card:hover{border-color:var(--accent-color);transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.3)}
+.agent-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.agent-emoji-wrap{display:flex;align-items:center;gap:10px}
+.agent-emoji{font-size:26px;line-height:1}
+.agent-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;letter-spacing:.04em}
+.agent-role{font-size:11.5px;color:var(--muted);margin-top:1px}
+.agent-status{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:flex;align-items:center;gap:5px}
+.status-dot{width:6px;height:6px;border-radius:50%}
+.agent-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.metric-box{background:var(--surface2);border-radius:10px;padding:10px 12px}
+.metric-label{font-size:11px;color:var(--muted);margin-bottom:4px}
+.metric-value{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
+.progress-wrap{margin-bottom:16px}
+.progress-header{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:6px}
+.progress-bar{height:5px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;background:var(--bar-color,var(--green));transition:width .8s ease;width:0%}
+.agent-btn{width:100%;padding:10px;border-radius:10px;border:1px solid currentColor;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;transition:all .15s;letter-spacing:.02em}
+.agent-btn:hover{background:var(--btn-hover-bg);border-color:transparent;color:#0a0a0f}
+
+/* BOTTOM */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.panel-header{padding:16px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.panel-body{padding:8px 0;max-height:220px;overflow-y:auto}
+.feed-item{display:flex;gap:12px;padding:10px 20px;border-bottom:1px solid var(--border);font-size:13px;animation:fadeIn .4s ease}
+.feed-item:last-child{border-bottom:none}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.feed-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
+.feed-text{flex:1}
+.feed-main{font-weight:500;color:var(--text)}
+.feed-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.empty-msg{padding:30px 20px;text-align:center;color:var(--muted);font-size:13px}
+.cand-table{width:100%;border-collapse:collapse}
+.cand-table th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:10px 20px;text-align:left;border-bottom:1px solid var(--border)}
+.cand-table td{padding:10px 20px;font-size:13px}
+.cand-table tr:not(:last-child) td{border-bottom:1px solid var(--border)}
+.cand-table tr:hover td{background:var(--surface2)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 40px 80px rgba(0,0,0,.5);animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.9) translateY(20px)}to{opacity:1;transform:none}}
+.modal-header{padding:22px 24px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-agent-chip{display:flex;align-items:center;gap:10px}
+.chip-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.chip-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:800}
+.chip-role{font-size:12px;color:var(--muted)}
+.close-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.close-btn:hover{background:var(--surface2);color:var(--text)}
+.modal-body{padding:22px 24px}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.form-input,.form-textarea,.form-select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13.5px;padding:10px 14px;transition:border-color .15s;resize:vertical;outline:none}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--focus-color,var(--green))}
+.form-textarea{min-height:90px}
+.run-btn{width:100%;padding:13px;border-radius:12px;border:none;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .2s;margin-top:4px}
+.run-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.run-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.processing{display:none;align-items:center;gap:8px;padding:14px 16px;margin-top:16px;background:var(--surface2);border-radius:10px;font-size:13px;color:var(--muted)}
+.processing.show{display:flex}
+.dot-anim{display:flex;gap:4px}
+.dot-anim span{width:6px;height:6px;border-radius:50%;background:var(--green);animation:dotP 1.4s ease-in-out infinite}
+.dot-anim span:nth-child(2){animation-delay:.2s}.dot-anim span:nth-child(3){animation-delay:.4s}
+@keyframes dotP{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1.1)}}
+.response-area{display:none;margin-top:16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);overflow:hidden}
+.response-area.show{display:block}
+.response-label{padding:10px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.response-label-left{display:flex;align-items:center;gap:6px}
+.response-content{padding:16px;font-size:13.5px;line-height:1.7;color:var(--text);white-space:pre-wrap}
+.error-msg{display:none;margin-top:14px;background:rgba(244,114,182,0.08);border:1px solid rgba(244,114,182,0.2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--pink);line-height:1.5}
+.error-msg.show{display:block}
+
+/* PDF download btn in modal */
+.pdf-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;border:1px solid rgba(110,231,183,0.3);background:rgba(110,231,183,0.08);color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;letter-spacing:.04em}
+.pdf-btn:hover{background:rgba(110,231,183,0.18)}
+
+/* CANDIDATOS PAGE */
+.cand-page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.search-bar{display:flex;align-items:center;gap:10px}
+.search-input{background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13.5px;padding:9px 14px;outline:none;width:240px;transition:border-color .15s}
+.search-input:focus{border-color:rgba(110,231,183,0.4)}
+.search-input::placeholder{color:var(--muted)}
+.clear-btn{padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;transition:all .15s}
+.clear-btn:hover{border-color:rgba(244,114,182,0.4);color:var(--pink)}
+.cand-count-lbl{font-size:13px;color:var(--muted)}
+.cand-list{display:flex;flex-direction:column;gap:14px}
+.cand-row{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .2s}
+.cand-row:hover{border-color:rgba(110,231,183,0.15)}
+.cand-row-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer;user-select:none}
+.cand-row-header:hover{background:rgba(255,255,255,0.02)}
+.cand-identity{display:flex;align-items:center;gap:14px}
+.cand-avatar{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--green),var(--indigo));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#0a0a0f;flex-shrink:0}
+.cand-info-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.cand-info-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.cand-row-right{display:flex;align-items:center;gap:10px}
+.res-count-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(110,231,183,0.1);color:var(--green);border:1px solid rgba(110,231,183,0.2)}
+.expand-arrow{color:var(--muted);font-size:12px;transition:transform .2s}
+.cand-row.expanded .expand-arrow{transform:rotate(180deg)}
+.cand-results{display:none;border-top:1px solid var(--border)}
+.cand-row.expanded .cand-results{display:block}
+
+/* Result card */
+.result-item{padding:16px 20px;border-bottom:1px solid var(--border)}
+.result-item:last-child{border-bottom:none}
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.result-agent-chip{display:flex;align-items:center;gap:8px}
+.result-agent-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.result-agent-name{font-size:12px;font-weight:700;letter-spacing:.04em}
+.result-header-right{display:flex;align-items:center;gap:8px}
+.result-ts{font-size:11px;color:var(--muted)}
+.result-body{background:var(--bg);border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.7;color:var(--text);border:1px solid var(--border);max-height:300px;overflow-y:auto;transition:border-color .15s}
+.result-body.collapsed{max-height:80px;overflow:hidden}
+.result-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.result-footer-left{display:flex;align-items:center;gap:10px}
+.result-toggle{font-size:11px;color:var(--green);cursor:pointer;font-weight:600}
+.result-delete{font-size:11px;color:var(--muted);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;transition:color .15s;padding:0}
+.result-delete:hover{color:var(--pink)}
+
+/* PDF action btn in result card */
+.pdf-action-btn{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:7px;border:1px solid rgba(251,191,36,0.3);background:rgba(251,191,36,0.07);color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;letter-spacing:.03em}
+.pdf-action-btn:hover{background:rgba(251,191,36,0.16)}
+
+/* Export all PDF btn */
+.export-all-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1px solid rgba(110,231,183,0.3);background:rgba(110,231,183,0.08);color:var(--green);font-size:12px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;letter-spacing:.03em}
+.export-all-btn:hover{background:rgba(110,231,183,0.18)}
+
+/* FAQ */
+.faq-section{margin-top:32px;padding-top:28px;border-top:1px solid var(--border)}
+.faq-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.faq-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all .2s}
+.faq-card:hover{border-color:rgba(110,231,183,0.25);transform:translateY(-1px)}
+.faq-q{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:8px;line-height:1.4}
+.faq-meta{display:flex;align-items:center;justify-content:space-between}
+.faq-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px}
+.faq-arrow{font-size:12px;color:var(--muted)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.empty-desc{font-size:13px}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:99px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.online-pulse{animation:pulse 2s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="logo"><div class="logo-inner"><div class="logo-icon">⚡</div><span class="logo-text">TalentAI</span></div></div>
+  <div class="nav-section">Navegación</div>
+  <a class="nav-item active" id="nav-dashboard" onclick="switchPage('dashboard')"><span class="icon">📊</span> Dashboard</a>
+  <a class="nav-item" id="nav-candidatos" onclick="switchPage('candidatos')"><span class="icon">👥</span> Candidatos</a>
+  <a class="nav-item"><span class="icon">🏢</span> Empresas</a>
+  <div class="nav-section" style="margin-top:10px">Agentes IA</div>
+  <div class="agent-nav" onclick="openModal('aria')"><div class="agent-dot" style="background:#fbbf24"></div><span>ARIA · Orquestador</span></div>
+  <div class="agent-nav" onclick="openModal('nexus')"><div class="agent-dot online-pulse" style="background:#6ee7b7"></div><span>NEXUS · Matching</span></div>
+  <div class="agent-nav" onclick="openModal('forma')"><div class="agent-dot online-pulse" style="background:#818cf8"></div><span>FORMA · Revisor CV</span></div>
+  <div class="agent-nav" onclick="openModal('pulse')"><div class="agent-dot" style="background:#f472b6"></div><span>PULSE · Entrevistas</span></div>
+  <div class="status-bar">
+    <div class="status-label">Estado del sistema</div>
+    <div class="status-pills">
+      <span class="status-pill" style="background:rgba(110,231,183,0.1);color:#6ee7b7">3/4 Online</span>
+      <span class="status-pill" style="background:rgba(251,191,36,0.1);color:#fbbf24">IA: Claude</span>
+    </div>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="topbar">
+    <h1 id="topbar-title">Dashboard de Empleo</h1>
+    <div class="topbar-right">
+      <span class="badge" id="top-badge" style="background:rgba(251,191,36,0.08);color:#fbbf24;border-color:rgba(251,191,36,0.2)">🟡 Sin actividad aún</span>
+      <span style="font-size:12px;color:var(--muted)" id="current-time"></span>
+    </div>
+  </div>
+  <div class="content">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card" style="--accent:var(--green)">
+        <div class="stat-label">Candidatos procesados</div>
+        <div class="stat-value" id="s-cands">0</div>
+        <div class="stat-change" id="s-cands-lbl">Sin actividad aún</div>
+      </div>
+      <div class="stat-card" style="--accent:var(--indigo)">
+        <div class="stat-label">Matches realizados</div>
+        <div class="stat-value" id="s-matches">0</div>
+        <div class="stat-change" id="s-matches-lbl">Sin actividad aún</div>
+      </div>
+      <div class="stat-card" style="--accent:var(--pink)">
+        <div class="stat-label">CVs analizados</div>
+        <div class="stat-value" id="s-cvs">0</div>
+        <div class="stat-change" id="s-cvs-lbl">Sin actividad aún</div>
+      </div>
+      <div class="stat-card" style="--accent:var(--gold)">
+        <div class="stat-label">Sesiones de entrevista</div>
+        <div class="stat-value" id="s-sessions">0</div>
+        <div class="stat-change" id="s-sessions-lbl">Sin actividad aún</div>
+      </div>
+    </div>
+    <div class="section-title"><span>🤖</span> Agentes IA</div>
+    <div class="agents-grid">
+      <div class="agent-card" style="--accent-color:var(--green);--glow:rgba(110,231,183,0.06)" onclick="openModal('nexus')">
+        <div class="agent-header">
+          <div class="agent-emoji-wrap"><span class="agent-emoji">🎯</span><div><div class="agent-name" style="color:var(--green)">NEXUS</div><div class="agent-role">Agente de Matching</div></div></div>
+          <div class="agent-status" style="background:rgba(110,231,183,0.1);color:var(--green)"><div class="status-dot online-pulse" style="background:var(--green)"></div>Online</div>
+        </div>
+        <div class="agent-metrics">
+          <div class="metric-box"><div class="metric-label">Matches hoy</div><div class="metric-value" style="color:var(--green)" id="m-nexus">0</div></div>
+          <div class="metric-box"><div class="metric-label">Candidatos únicos</div><div class="metric-value" style="color:var(--green)" id="m-nexus-u">0</div></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-header"><span>Actividad relativa</span><span id="m-nexus-pct">0%</span></div><div class="progress-bar"><div class="progress-fill" style="--bar-color:var(--green)" id="m-nexus-bar"></div></div></div>
+        <button class="agent-btn" style="color:var(--green);--btn-hover-bg:var(--green)">▶ Ejecutar Matching</button>
+      </div>
+      <div class="agent-card" style="--accent-color:var(--indigo);--glow:rgba(129,140,248,0.06)" onclick="openModal('forma')">
+        <div class="agent-header">
+          <div class="agent-emoji-wrap"><span class="agent-emoji">📄</span><div><div class="agent-name" style="color:var(--indigo)">FORMA</div><div class="agent-role">Agente Revisor de CVs</div></div></div>
+          <div class="agent-status" style="background:rgba(129,140,248,0.1);color:var(--indigo)"><div class="status-dot online-pulse" style="background:var(--indigo)"></div>Online</div>
+        </div>
+        <div class="agent-metrics">
+          <div class="metric-box"><div class="metric-label">CVs revisados</div><div class="metric-value" style="color:var(--indigo)" id="m-forma">0</div></div>
+          <div class="metric-box"><div class="metric-label">Candidatos únicos</div><div class="metric-value" style="color:var(--indigo)" id="m-forma-u">0</div></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-header"><span>Actividad relativa</span><span id="m-forma-pct">0%</span></div><div class="progress-bar"><div class="progress-fill" style="--bar-color:var(--indigo)" id="m-forma-bar"></div></div></div>
+        <button class="agent-btn" style="color:var(--indigo);--btn-hover-bg:var(--indigo)">▶ Analizar CV</button>
+      </div>
+      <div class="agent-card" style="--accent-color:var(--pink);--glow:rgba(244,114,182,0.06)" onclick="openModal('pulse')">
+        <div class="agent-header">
+          <div class="agent-emoji-wrap"><span class="agent-emoji">🎙️</span><div><div class="agent-name" style="color:var(--pink)">PULSE</div><div class="agent-role">Agente de Entrevistas</div></div></div>
+          <div class="agent-status" style="background:rgba(244,114,182,0.1);color:var(--pink)"><div class="status-dot" style="background:var(--pink)"></div>Disponible</div>
+        </div>
+        <div class="agent-metrics">
+          <div class="metric-box"><div class="metric-label">Sesiones hoy</div><div class="metric-value" style="color:var(--pink)" id="m-pulse">0</div></div>
+          <div class="metric-box"><div class="metric-label">Candidatos prep.</div><div class="metric-value" style="color:var(--pink)" id="m-pulse-u">0</div></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-header"><span>Actividad relativa</span><span id="m-pulse-pct">0%</span></div><div class="progress-bar"><div class="progress-fill" style="--bar-color:var(--pink)" id="m-pulse-bar"></div></div></div>
+        <button class="agent-btn" style="color:var(--pink);--btn-hover-bg:var(--pink)">▶ Preparar Entrevista</button>
+      </div>
+    </div>
+    <div class="bottom-grid">
+      <div class="panel">
+        <div class="panel-header"><span>⚡ Actividad en tiempo real</span><span style="font-size:11px;color:var(--green);font-weight:500">Live</span></div>
+        <div class="panel-body" id="activity-feed"><div class="empty-msg">Aún no hay actividad.<br>Ejecuta un agente para empezar.</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span>🏆 Candidatos recientes</span></div>
+        <div class="panel-body" id="recent-wrap"><div class="empty-msg">Ningún candidato procesado aún.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANDIDATOS -->
+  <div class="page" id="page-candidatos">
+    <div class="cand-page-header">
+      <div><div class="section-title" style="margin-bottom:4px">👥 Candidatos</div><div class="cand-count-lbl" id="cand-count">Sin candidatos aún</div></div>
+      <div class="search-bar">
+        <input class="search-input" id="cand-search" placeholder="🔍  Buscar candidato..." oninput="renderCandidatos()">
+        <button class="export-all-btn" onclick="exportAllPDF()" id="export-all-btn" style="display:none">📥 Exportar todo</button>
+        <button class="clear-btn" onclick="confirmClearAll()">🗑 Limpiar todo</button>
+      </div>
+    </div>
+    <div id="cand-list" class="cand-list"></div>
+    <div class="faq-section">
+      <div class="section-title"><span>💡</span> Preguntas frecuentes por agente</div>
+      <div class="faq-grid">
+        <div class="faq-card" onclick="openModal('nexus')"><div class="faq-q">¿Qué roles son los más adecuados para mi perfil?</div><div class="faq-meta"><span class="faq-tag" style="background:rgba(110,231,183,0.1);color:#6ee7b7">🎯 NEXUS</span><span class="faq-arrow">→ Ejecutar</span></div></div>
+        <div class="faq-card" onclick="openModal('forma')"><div class="faq-q">¿Cómo puedo mejorar mi CV para superar filtros ATS?</div><div class="faq-meta"><span class="faq-tag" style="background:rgba(129,140,248,0.1);color:#818cf8">📄 FORMA</span><span class="faq-arrow">→ Analizar</span></div></div>
+        <div class="faq-card" onclick="openModal('pulse')"><div class="faq-q">¿Qué preguntas me harán en la entrevista?</div><div class="faq-meta"><span class="faq-tag" style="background:rgba(244,114,182,0.1);color:#f472b6">🎙️ PULSE</span><span class="faq-arrow">→ Preparar</span></div></div>
+        <div class="faq-card" onclick="openModal('aria')"><div class="faq-q">¿Cómo priorizo el proceso para varios candidatos?</div><div class="faq-meta"><span class="faq-tag" style="background:rgba(251,191,36,0.1);color:#fbbf24">⚡ ARIA</span><span class="faq-arrow">→ Orquestar</span></div></div>
+        <div class="faq-card" onclick="openModal('nexus')"><div class="faq-q">¿Cuál es el score de empleabilidad de este candidato?</div><div class="faq-meta"><span class="faq-tag" style="background:rgba(110,231,183,0.1);color:#6ee7b7">🎯 NEXUS</span><span class="faq-arrow">→ Ejecutar</span></div></div>
+        <div class="faq-card" onclick="openModal('pulse')"><div class="faq-q">¿Cómo construyo un elevator pitch de 30 segundos?</div><div class="faq-meta"><span class="faq-tag" style="background:rgba(244,114,182,0.1);color:#f472b6">🎙️ PULSE</span><span class="faq-arrow">→ Preparar</span></div></div>
+        <div class="faq-card" onclick="openModal('forma')"><div class="faq-q">¿Qué keywords debo incluir en mi CV para este puesto?</div><div class="faq-meta"><span class="faq-tag" style="background:rgba(129,140,248,0.1);color:#818cf8">📄 FORMA</span><span class="faq-arrow">→ Analizar</span></div></div>
+        <div class="faq-card" onclick="openModal('aria')"><div class="faq-q">¿Qué agentes necesito para un proceso completo?</div><div class="faq-meta"><span class="faq-tag" style="background:rgba(251,191,36,0.1);color:#fbbf24">⚡ ARIA</span><span class="faq-arrow">→ Orquestar</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-agent-chip">
+        <div class="chip-icon" id="modal-icon"><span id="modal-emoji">🎯</span></div>
+        <div><div class="chip-name" id="modal-name">NEXUS</div><div class="chip-role" id="modal-role">Agente de Matching</div></div>
+      </div>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-fields"></div>
+      <div class="processing" id="processing"><div class="dot-anim"><span></span><span></span><span></span></div><span id="proc-text">Procesando...</span></div>
+      <div class="error-msg" id="error-msg"></div>
+      <div class="response-area" id="response-area">
+        <div class="response-label">
+          <div class="response-label-left"><span id="resp-icon">🎯</span><span id="resp-label">Respuesta de NEXUS</span></div>
+          <button class="pdf-btn" id="modal-pdf-btn" onclick="downloadModalPDF()">📥 Guardar PDF</button>
+        </div>
+        <div class="response-content" id="resp-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MODE = 'antigravity';
+const BACKEND_URL = 'http://localhost:8000';
+
+const AGENTS = {
+  nexus:{name:'NEXUS',role:'Agente de Matching',emoji:'🎯',color:'#6ee7b7',bg:'rgba(110,231,183,0.15)',
+    system:`Eres NEXUS, agente experto en matching de talento. Analiza el perfil y proporciona:\n1. Top 3 roles recomendados con justificacion\n2. Sectores ideales\n3. Palabras clave para la busqueda\n4. Score de empleabilidad (0-100)\n5. Proximos pasos\nResponde en espanol con formato claro usando ** para titulos de seccion.`,
+    fields:()=>`<div class="form-group"><label class="form-label">Nombre del candidato</label><input class="form-input" id="f1" placeholder="Ej: Laura Garcia" style="--focus-color:#6ee7b7"></div><div class="form-group"><label class="form-label">Perfil profesional</label><textarea class="form-textarea" id="f2" placeholder="Describe experiencia, habilidades, formacion..." style="--focus-color:#6ee7b7;min-height:110px"></textarea></div>`,
+    buildPrompt:()=>{const n=document.getElementById('f1').value.trim(),p=document.getElementById('f2').value.trim();if(!n||!p)return null;return{name:n,text:`Candidato: ${n}\n\nPerfil profesional:\n${p}`}},
+    btnLabel:'▶ Ejecutar Matching'},
+  forma:{name:'FORMA',role:'Agente Revisor de CVs',emoji:'📄',color:'#818cf8',bg:'rgba(129,140,248,0.15)',
+    system:`Eres FORMA, experto en CVs. Analiza y entrega:\n1. Puntuacion del CV (0-100) con desglose\n2. Puntos fuertes\n3. Mejoras criticas ordenadas por impacto (max 5)\n4. Reescritura de 2-3 bullets como ejemplo\n5. Palabras ATS para el puesto objetivo\nResponde en espanol con formato claro usando ** para titulos de seccion.`,
+    fields:()=>`<div class="form-group"><label class="form-label">Nombre del candidato</label><input class="form-input" id="f1" placeholder="Ej: Carlos Ruiz" style="--focus-color:#818cf8"></div><div class="form-group"><label class="form-label">Contenido del CV</label><textarea class="form-textarea" id="f2" placeholder="Pega aqui el contenido del CV..." style="--focus-color:#818cf8;min-height:110px"></textarea></div><div class="form-group"><label class="form-label">Puesto objetivo</label><input class="form-input" id="f3" placeholder="Ej: Frontend Developer en startup" style="--focus-color:#818cf8"></div>`,
+    buildPrompt:()=>{const n=document.getElementById('f1').value.trim(),cv=document.getElementById('f2').value.trim(),j=document.getElementById('f3').value.trim();if(!n||!cv||!j)return null;return{name:n,text:`Candidato: ${n}\nPuesto objetivo: ${j}\n\nCV:\n${cv}`}},
+    btnLabel:'▶ Analizar CV'},
+  pulse:{name:'PULSE',role:'Agente de Entrevistas',emoji:'🎙',color:'#f472b6',bg:'rgba(244,114,182,0.15)',
+    system:`Eres PULSE, coach de entrevistas. Prepara al candidato con:\n1. 5 preguntas mas probables con respuestas modelo (metodo STAR)\n2. Red flags a evitar\n3. 3 preguntas inteligentes para el entrevistador\n4. Elevator pitch de 30 segundos\n5. Estrategia mental para el dia\nResponde en espanol con formato claro usando ** para titulos de seccion.`,
+    fields:()=>`<div class="form-group"><label class="form-label">Nombre del candidato</label><input class="form-input" id="f1" placeholder="Ej: Ana Martinez" style="--focus-color:#f472b6"></div><div class="form-group"><label class="form-label">Empresa y puesto</label><input class="form-input" id="f2" placeholder="Ej: Product Manager en Glovo" style="--focus-color:#f472b6"></div><div class="form-group"><label class="form-label">Nivel de experiencia</label><select class="form-select" id="f3" style="--focus-color:#f472b6"><option value="">Selecciona nivel...</option><option>Junior (0-2 años)</option><option>Mid (2-5 años)</option><option>Senior (5+ años)</option><option>Lead / Manager</option></select></div>`,
+    buildPrompt:()=>{const n=document.getElementById('f1').value.trim(),j=document.getElementById('f2').value.trim(),l=document.getElementById('f3').value;if(!n||!j||!l)return null;return{name:n,text:`Candidato: ${n}\nPuesto: ${j}\nNivel: ${l}`}},
+    btnLabel:'▶ Preparar Entrevista'},
+  aria:{name:'ARIA',role:'Orquestadora del Sistema',emoji:'⚡',color:'#fbbf24',bg:'rgba(251,191,36,0.15)',
+    system:`Eres ARIA, orquestadora del sistema TalentAI. Cuando recibas una tarea compleja:\n1. Identifica que agentes se necesitan (NEXUS, FORMA, PULSE)\n2. Diseña el flujo paso a paso\n3. Ejecuta el analisis principal\n4. Prioriza candidatos si hay varios\n5. Da un resumen ejecutivo con proximas acciones\nResponde en espanol con formato claro usando ** para titulos de seccion.`,
+    fields:()=>`<div class="form-group"><label class="form-label">Tarea a gestionar</label><textarea class="form-textarea" id="f1" placeholder="Describe la tarea compleja que necesitas coordinar entre agentes..." style="--focus-color:#fbbf24;min-height:140px"></textarea></div>`,
+    buildPrompt:()=>{const t=document.getElementById('f1').value.trim();if(!t)return null;return{name:'Consulta general',text:t}},
+    btnLabel:'▶ Ejecutar ARIA'}
+};
+
+let currentAgent=null,lastResponse=null,lastCandidateName=null;
+let history={};
+let stats={nexus:0,forma:0,pulse:0,aria:0};
+
+// ── STORAGE ────────────────────────────────────────────────────────────────
+function persist(){
+  const d=JSON.stringify({history,stats});
+  try{if(window.storage)window.storage.set('talentai-v4',d)}catch(e){}
+  try{sessionStorage.setItem('talentai-v4',d)}catch(e){}
+}
+async function hydrate(){
+  let raw=null;
+  try{if(window.storage){const r=await window.storage.get('talentai-v4');if(r)raw=r.value}}catch(e){}
+  if(!raw){try{raw=sessionStorage.getItem('talentai-v4')}catch(e){}}
+  if(raw){try{const d=JSON.parse(raw);if(d.history)history=d.history;if(d.stats)stats={nexus:0,forma:0,pulse:0,aria:0,...d.stats}}catch(e){}}
+  refreshStats();
+}
+
+// ── PDF GENERATION ─────────────────────────────────────────────────────────
+function buildPDF(candidateName, agentName, agentEmoji, resultText, timestamp) {
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const margin = 20;
+  const contentW = W - margin * 2;
+
+  // Header background
+  doc.setFillColor(17, 17, 24);
+  doc.rect(0, 0, W, 42, 'F');
+
+  // Accent line top
+  doc.setFillColor(110, 231, 183);
+  doc.rect(0, 0, W, 2, 'F');
+
+  // Logo text
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(110, 231, 183);
+  doc.text('TalentAI', margin, 16);
+
+  // Agent name in header
+  doc.setFontSize(11);
+  doc.setTextColor(180, 180, 200);
+  doc.text(`${agentName} — Informe de Análisis`, margin, 26);
+
+  // Date/time
+  doc.setFontSize(9);
+  doc.setTextColor(100, 116, 139);
+  doc.text(timestamp, W - margin, 26, {align:'right'});
+
+  // Candidate name box
+  doc.setFillColor(22, 22, 31);
+  doc.roundedRect(margin, 32, contentW, 14, 3, 3, 'F');
+  doc.setFontSize(13);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(226, 232, 240);
+  doc.text(`Candidato: ${candidateName}`, margin + 6, 41);
+
+  // Content area
+  let y = 56;
+  const lineH = 6;
+  const clean = resultText
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1');
+
+  const lines = clean.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (y > H - 25) {
+      // Footer before new page
+      addFooter(doc, W, H, margin);
+      doc.addPage();
+      doc.setFillColor(17, 17, 24);
+      doc.rect(0, 0, W, 8, 'F');
+      doc.setFillColor(110, 231, 183);
+      doc.rect(0, 0, W, 1.5, 'F');
+      y = 20;
+    }
+
+    const isSection = /^[0-9]+\./.test(line.trim()) || (line.trim().length > 0 && line.trim() === line.trim().toUpperCase() && line.trim().length < 50);
+    const isEmpty = line.trim() === '';
+
+    if (isEmpty) { y += lineH * 0.5; continue; }
+
+    if (isSection || line.startsWith('**') || /^[0-9]+\./.test(line.trim())) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(110, 231, 183);
+    } else if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(180, 190, 210);
+    } else {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(200, 210, 225);
+    }
+
+    const wrapped = doc.splitTextToSize(line, contentW - 4);
+    for (const wl of wrapped) {
+      if (y > H - 25) {
+        addFooter(doc, W, H, margin);
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(wl, margin + 2, y);
+      y += lineH;
+    }
+  }
+
+  addFooter(doc, W, H, margin);
+  return doc;
+}
+
+function addFooter(doc, W, H, margin) {
+  doc.setFillColor(17, 17, 24);
+  doc.rect(0, H - 14, W, 14, 'F');
+  doc.setFillColor(110, 231, 183);
+  doc.rect(0, H - 14, W, 0.8, 'F');
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(100, 116, 139);
+  doc.text('Generado por TalentAI · Plataforma de Gestión de Empleo', margin, H - 5);
+  doc.text(`Pág. ${doc.internal.getCurrentPageInfo().pageNumber}`, W - margin, H - 5, {align:'right'});
+}
+
+function downloadPDF(candidateName, agentName, agentEmoji, resultText, timestamp) {
+  const doc = buildPDF(candidateName, agentName, agentEmoji, resultText, timestamp);
+  const safeName = candidateName.replace(/[^a-zA-Z0-9áéíóúñü ]/g,'').replace(/ /g,'_');
+  doc.save(`TalentAI_${agentName}_${safeName}.pdf`);
+}
+
+function downloadModalPDF() {
+  if (!lastResponse || !lastCandidateName || !currentAgent) return;
+  const a = AGENTS[currentAgent];
+  const ts = new Date().toLocaleString('es-ES', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  downloadPDF(lastCandidateName, a.name, a.emoji, lastResponse, ts);
+}
+
+function downloadResultPDF(candidateName, resultId) {
+  if (!history[candidateName]) return;
+  const r = history[candidateName].find(x => x.id === resultId);
+  if (!r) return;
+  downloadPDF(candidateName, r.agent, r.emoji, r.result, r.ts);
+}
+
+function exportAllPDF() {
+  const names = Object.keys(history);
+  if (names.length === 0) return;
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const margin = 20;
+
+  let firstPage = true;
+  for (const name of names) {
+    const results = history[name];
+    for (const r of results) {
+      if (!firstPage) doc.addPage();
+      firstPage = false;
+      const inner = buildPDF(name, r.agent, r.emoji, r.result, r.ts);
+      const totalPages = inner.internal.getNumberOfPages();
+      for (let p = 1; p <= totalPages; p++) {
+        if (p > 1) doc.addPage();
+        // copy pages via data URL approach — use individual exports instead
+      }
+    }
+  }
+
+  // Simpler: generate one combined doc by iterating results
+  const doc2 = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  let isFirst = true;
+  for (const name of names) {
+    for (const r of history[name]) {
+      if (!isFirst) doc2.addPage();
+      isFirst = false;
+      writePDFContent(doc2, name, r.agent, r.emoji, r.result, r.ts);
+    }
+  }
+  doc2.save(`TalentAI_Informe_Completo_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
+function writePDFContent(doc, candidateName, agentName, agentEmoji, resultText, timestamp) {
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const margin = 20;
+  const contentW = W - margin * 2;
+  const lineH = 6;
+
+  const startPage = doc.internal.getCurrentPageInfo().pageNumber;
+
+  doc.setFillColor(17, 17, 24);
+  doc.rect(0, 0, W, 42, 'F');
+  doc.setFillColor(110, 231, 183);
+  doc.rect(0, 0, W, 2, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(110, 231, 183);
+  doc.text('TalentAI', margin, 16);
+
+  doc.setFontSize(11);
+  doc.setTextColor(180, 180, 200);
+  doc.text(`${agentName} — Informe de Análisis`, margin, 26);
+
+  doc.setFontSize(9);
+  doc.setTextColor(100, 116, 139);
+  doc.text(timestamp, W - margin, 26, {align:'right'});
+
+  doc.setFillColor(22, 22, 31);
+  doc.roundedRect(margin, 32, contentW, 14, 3, 3, 'F');
+  doc.setFontSize(13);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(226, 232, 240);
+  doc.text(`Candidato: ${candidateName}`, margin + 6, 41);
+
+  let y = 56;
+  const clean = resultText.replace(/\*\*(.*?)\*\*/g,'$1').replace(/\*(.*?)\*/g,'$1');
+  const lines = clean.split('\n');
+
+  for (const line of lines) {
+    if (line.trim() === '') { y += lineH * 0.5; continue; }
+    if (y > H - 25) {
+      addFooter(doc, W, H, margin);
+      doc.addPage();
+      doc.setFillColor(17,17,24);doc.rect(0,0,W,8,'F');
+      doc.setFillColor(110,231,183);doc.rect(0,0,W,1.5,'F');
+      y = 20;
+    }
+    if (/^[0-9]+\./.test(line.trim())) {
+      doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(110,231,183);
+    } else if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
+      doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(180,190,210);
+    } else {
+      doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(200,210,225);
+    }
+    const wrapped = doc.splitTextToSize(line, contentW - 4);
+    for (const wl of wrapped) {
+      if (y > H - 25) {
+        addFooter(doc, W, H, margin);
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(wl, margin + 2, y);
+      y += lineH;
+    }
+  }
+  addFooter(doc, W, H, margin);
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────
+function refreshStats(){
+  const names=Object.keys(history);
+  const total=names.length;
+  const totalExec=stats.nexus+stats.forma+stats.pulse+stats.aria;
+  $('s-cands',total);$('s-matches',stats.nexus);$('s-cvs',stats.forma);$('s-sessions',stats.pulse);
+  lbl('s-cands-lbl',total,`candidato${total!==1?'s':''} procesado${total!==1?'s':''}`);
+  lbl('s-matches-lbl',stats.nexus,`match${stats.nexus!==1?'es':''} ejecutado${stats.nexus!==1?'s':''}`);
+  lbl('s-cvs-lbl',stats.forma,`CV${stats.forma!==1?'s':''} analizado${stats.forma!==1?'s':''}`);
+  lbl('s-sessions-lbl',stats.pulse,`sesión${stats.pulse!==1?'es':''} realizada${stats.pulse!==1?'s':''}`);
+  $('m-nexus',stats.nexus);$('m-forma',stats.forma);$('m-pulse',stats.pulse);
+  const nu=names.filter(n=>history[n].some(r=>r.ak==='nexus')).length;
+  const fu=names.filter(n=>history[n].some(r=>r.ak==='forma')).length;
+  const pu=names.filter(n=>history[n].some(r=>r.ak==='pulse')).length;
+  $('m-nexus-u',nu);$('m-forma-u',fu);$('m-pulse-u',pu);
+  bar('m-nexus-bar','m-nexus-pct',stats.nexus,totalExec);
+  bar('m-forma-bar','m-forma-pct',stats.forma,totalExec);
+  bar('m-pulse-bar','m-pulse-pct',stats.pulse,totalExec);
+  const badge=document.getElementById('top-badge');
+  if(totalExec>0){badge.textContent=`🟢 ${totalExec} ejecucion${totalExec!==1?'es':''}`;badge.style.cssText='background:rgba(110,231,183,0.1);color:#6ee7b7;border-color:rgba(110,231,183,0.2)'}
+  else{badge.textContent='🟡 Sin actividad aún';badge.style.cssText='background:rgba(251,191,36,0.08);color:#fbbf24;border-color:rgba(251,191,36,0.2)'}
+  renderRecent();
+}
+function $(id,v){const e=document.getElementById(id);if(e)e.textContent=v}
+function lbl(id,c,l){const e=document.getElementById(id);if(!e)return;if(c===0){e.textContent='Sin actividad aún';e.className='stat-change'}else{e.textContent=`↑ ${c} ${l}`;e.className='stat-change positive'}}
+function bar(bid,pid,c,t){const p=t>0?Math.round(c/t*100):0;const b=document.getElementById(bid);const pe=document.getElementById(pid);if(b)b.style.width=p+'%';if(pe)pe.textContent=p+'%'}
+function renderRecent(){
+  const w=document.getElementById('recent-wrap');if(!w)return;
+  const entries=[];
+  for(const[name,results]of Object.entries(history))for(const r of results)entries.push({name,...r});
+  entries.sort((a,b)=>b.id-a.id);const rec=entries.slice(0,5);
+  if(rec.length===0){w.innerHTML='<div class="empty-msg">Ningún candidato procesado aún.</div>';return}
+  w.innerHTML=`<table class="cand-table"><thead><tr><th>Candidato</th><th>Agente</th><th>Hora</th></tr></thead><tbody>${rec.map(e=>`<tr><td>${e.name}</td><td><span style="font-size:12px;font-weight:700;color:${e.color}">${e.emoji} ${e.agent}</span></td><td style="color:var(--muted);font-size:12px">${e.ts}</td></tr>`).join('')}</tbody></table>`;
+}
+
+// ── SAVE RESULT ───────────────────────────────────────────────────────────
+function saveResult(candidateName,agentKey,responseText){
+  const a=AGENTS[agentKey];const key=candidateName.trim();
+  if(!history[key])history[key]=[];
+  history[key].unshift({id:Date.now(),agent:a.name,ak:agentKey,emoji:a.emoji,color:a.color,bg:a.bg,result:responseText,ts:new Date().toLocaleString('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})});
+  stats[agentKey]=(stats[agentKey]||0)+1;
+  persist();refreshStats();
+}
+function deleteResult(candidateName,resultId){
+  if(!history[candidateName])return;
+  const removed=history[candidateName].find(r=>r.id===resultId);
+  history[candidateName]=history[candidateName].filter(r=>r.id!==resultId);
+  if(history[candidateName].length===0)delete history[candidateName];
+  if(removed)stats[removed.ak]=Math.max(0,(stats[removed.ak]||1)-1);
+  persist();refreshStats();renderCandidatos();
+}
+function confirmClearAll(){
+  if(Object.keys(history).length===0)return;
+  if(confirm('¿Eliminar todo el historial y resetear todos los contadores a cero?')){
+    history={};stats={nexus:0,forma:0,pulse:0,aria:0};persist();refreshStats();renderCandidatos();
+    document.getElementById('activity-feed').innerHTML='<div class="empty-msg">Aún no hay actividad.<br>Ejecuta un agente para empezar.</div>';
+  }
+}
+
+// ── PAGES ─────────────────────────────────────────────────────────────────
+function switchPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  const nav=document.getElementById(`nav-${page}`);if(nav)nav.classList.add('active');
+  document.getElementById('topbar-title').textContent={dashboard:'Dashboard de Empleo',candidatos:'Candidatos'}[page]||page;
+  if(page==='candidatos')renderCandidatos();
+}
+
+// ── RENDER CANDIDATOS ─────────────────────────────────────────────────────
+function renderCandidatos(){
+  const list=document.getElementById('cand-list');
+  const countEl=document.getElementById('cand-count');
+  const exportBtn=document.getElementById('export-all-btn');
+  const q=(document.getElementById('cand-search')?.value||'').toLowerCase();
+  const names=Object.keys(history).filter(n=>!q||n.toLowerCase().includes(q));
+  const total=Object.keys(history).length;
+  const totalR=Object.values(history).reduce((s,r)=>s+r.length,0);
+
+  if(exportBtn) exportBtn.style.display = total > 0 ? 'flex' : 'none';
+
+  countEl.textContent=total>0
+    ?`${total} candidato${total!==1?'s':''} · ${totalR} resultado${totalR!==1?'s':''} guardados`
+    :'Sin candidatos aún — ejecuta un agente para guardar resultados';
+
+  if(names.length===0){
+    list.innerHTML=`<div class="empty-state"><div class="empty-icon">👤</div><div class="empty-title">${q?`Sin resultados para "${q}"`:'Historial vacío'}</div><div class="empty-desc">${q?'Prueba con otro nombre.':'Ejecuta cualquier agente con un nombre de candidato y los resultados aparecerán aquí.'}</div></div>`;
+    return;
+  }
+
+  list.innerHTML=names.map(name=>{
+    const results=history[name];
+    const initials=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const tags=[...new Set(results.map(r=>r.emoji))].join(' ');
+    const safe=name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+    const rHTML=results.map(r=>`
+      <div class="result-item">
+        <div class="result-header">
+          <div class="result-agent-chip">
+            <div class="result-agent-icon" style="background:${r.bg}">${r.emoji}</div>
+            <span class="result-agent-name" style="color:${r.color}">${r.agent}</span>
+          </div>
+          <div class="result-header-right">
+            <span class="result-ts">${r.ts}</span>
+            <button class="pdf-action-btn" onclick="downloadResultPDF('${safe}',${r.id})" title="Descargar como PDF">
+              📥 PDF
+            </button>
+          </div>
+        </div>
+        <div class="result-body collapsed" id="rb-${r.id}">${renderMD(r.result)}</div>
+        <div class="result-footer">
+          <div class="result-footer-left">
+            <span class="result-toggle" onclick="toggleResult(${r.id})">▼ Ver completo</span>
+          </div>
+          <button class="result-delete" onclick="deleteResult('${safe}',${r.id})">🗑 Eliminar</button>
+        </div>
+      </div>`).join('');
+
+    // Export all results for this candidate as single PDF
+    const hasMult = results.length > 1;
+    return `<div class="cand-row" id="crow-${CSS.escape(name)}">
+      <div class="cand-row-header" onclick="toggleCandidate('${safe}')">
+        <div class="cand-identity">
+          <div class="cand-avatar">${initials}</div>
+          <div>
+            <div class="cand-info-name">${name}</div>
+            <div class="cand-info-meta">${tags} · ${results.length} resultado${results.length!==1?'s':''}</div>
+          </div>
+        </div>
+        <div class="cand-row-right">
+          ${hasMult ? `<button class="pdf-action-btn" onclick="event.stopPropagation();exportCandidatePDF('${safe}')" title="Exportar todos los informes de ${name}">📥 Todos</button>` : ''}
+          <span class="res-count-badge">${results.length}</span>
+          <span class="expand-arrow">▼</span>
+        </div>
+      </div>
+      <div class="cand-results">${rHTML}</div>
+    </div>`;
+  }).join('');
+}
+
+function exportCandidatePDF(candidateName) {
+  const results = history[candidateName];
+  if (!results || results.length === 0) return;
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  let isFirst = true;
+  for (const r of results) {
+    if (!isFirst) doc.addPage();
+    isFirst = false;
+    writePDFContent(doc, candidateName, r.agent, r.emoji, r.result, r.ts);
+  }
+  const safe = candidateName.replace(/[^a-zA-Z0-9áéíóúñü ]/g,'').replace(/ /g,'_');
+  doc.save(`TalentAI_${safe}_TodosInformes.pdf`);
+}
+
+function toggleCandidate(name){const el=document.getElementById(`crow-${CSS.escape(name)}`);if(el)el.classList.toggle('expanded')}
+function toggleResult(id){const el=document.getElementById(`rb-${id}`);const tog=el?.nextElementSibling?.querySelector('.result-toggle');if(!el)return;const c=el.classList.toggle('collapsed');if(tog)tog.textContent=c?'▼ Ver completo':'▲ Contraer'}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────
+function openModal(agentKey){
+  currentAgent=agentKey;lastResponse=null;lastCandidateName=null;
+  const a=AGENTS[agentKey];
+  document.getElementById('modal-icon').style.background=a.bg;
+  document.getElementById('modal-emoji').textContent=a.emoji;
+  document.getElementById('modal-name').textContent=a.name;
+  document.getElementById('modal-name').style.color=a.color;
+  document.getElementById('modal-role').textContent=a.role;
+  document.getElementById('modal-fields').innerHTML=a.fields();
+  document.getElementById('processing').classList.remove('show');
+  document.getElementById('error-msg').classList.remove('show');
+  document.getElementById('response-area').classList.remove('show');
+  document.getElementById('run-btn-dyn')?.remove();
+  const btn=document.createElement('button');btn.id='run-btn-dyn';btn.className='run-btn';
+  btn.textContent=a.btnLabel;btn.style.cssText=`background:${a.bg};color:${a.color};border:1px solid ${a.color}40;`;
+  btn.onclick=executeAgent;document.getElementById('modal-fields').after(btn);
+  document.getElementById('resp-icon').textContent=a.emoji;
+  document.getElementById('resp-label').textContent=`Respuesta de ${a.name}`;
+  document.getElementById('overlay').classList.add('open');document.body.style.overflow='hidden';
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open');document.body.style.overflow='';currentAgent=null}
+function closeModalOnOverlay(e){if(e.target===document.getElementById('overlay'))closeModal()}
+
+// ── EXECUTE ───────────────────────────────────────────────────────────────
+async function executeAgent(){
+  if(!currentAgent)return;const a=AGENTS[currentAgent];
+  const pd=a.buildPrompt();if(!pd){showError('Por favor, rellena todos los campos requeridos.');return}
+  const{name:cname,text:userMsg}=pd;
+  const btn=document.getElementById('run-btn-dyn');btn.disabled=true;
+  document.getElementById('processing').classList.add('show');
+  document.getElementById('error-msg').classList.remove('show');
+  document.getElementById('response-area').classList.remove('show');
+  document.getElementById('proc-text').textContent=`${a.name} analizando...`;
+  try{
+    const txt=MODE==='antigravity'?await callAntigravity(a.system,userMsg):await callBackend(a.system,userMsg);
+    lastResponse=txt;lastCandidateName=cname;
+    document.getElementById('resp-content').innerHTML=renderMD(txt);
+    document.getElementById('response-area').classList.add('show');
+    saveResult(cname,currentAgent,txt);
+    addFeedItem(a,cname);
+  }catch(err){showError(err.message)}
+  finally{document.getElementById('processing').classList.remove('show');btn.disabled=false}
+}
+
+// ── API ───────────────────────────────────────────────────────────────────
+async function callAntigravity(system,userMsg){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system,messages:[{role:'user',content:userMsg}]})});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(`Error API: ${e.error?.message||r.statusText}`)}
+  const d=await r.json();return d.content.map(b=>b.type==='text'?b.text:'').join('');
+}
+async function callBackend(system,userMsg){
+  let r;try{r=await fetch(`${BACKEND_URL}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system,user:userMsg})})}catch{throw new Error('No se puede conectar al servidor. Verifica que el backend está corriendo en '+BACKEND_URL)}
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.detail||`Error ${r.status}`)}
+  return(await r.json()).text;
+}
+function renderMD(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/`(.*?)`/g,'<code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;font-size:12px">$1</code>').replace(/\n/g,'<br>')}
+function showError(msg){const e=document.getElementById('error-msg');e.textContent=msg;e.classList.add('show')}
+function addFeedItem(agent,cname){
+  const feed=document.getElementById('activity-feed');
+  const em=feed.querySelector('.empty-msg');if(em)em.remove();
+  const now=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+  const item=document.createElement('div');item.className='feed-item';
+  item.innerHTML=`<div class="feed-icon" style="background:${agent.bg}">${agent.emoji}</div><div class="feed-text"><div class="feed-main">${agent.name} procesó a <strong>${cname}</strong></div><div class="feed-meta">Resultado guardado · ${now}</div></div>`;
+  feed.insertBefore(item,feed.firstChild);if(feed.children.length>10)feed.removeChild(feed.lastChild);
+}
+function updateClock(){const e=document.getElementById('current-time');if(e)e.textContent=new Date().toLocaleString('es-ES',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+updateClock();setInterval(updateClock,60000);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+hydrate();
+</script>
+</body>
+</html>
