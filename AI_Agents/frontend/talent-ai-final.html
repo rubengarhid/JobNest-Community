@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TalentAI — Centro de Agentes</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #6ee7b7;
+    --accent2: #818cf8;
+    --accent3: #f472b6;
+    --accent4: #fbbf24;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --danger: #f87171;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(110,231,183,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110,231,183,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  nav { display: flex; flex-direction: column; gap: 4px; }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 8px;
+    margin-bottom: 6px;
+    margin-top: 12px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--muted);
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: rgba(110,231,183,0.08);
+    color: var(--accent);
+    border-color: rgba(110,231,183,0.2);
+  }
+
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    flex-shrink: 0;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 14px;
+    background: var(--surface2);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .sidebar-footer .label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .sidebar-footer .value { font-size: 13px; font-weight: 500; color: var(--accent); }
+
+  /* MAIN */
+  main {
+    padding: 32px 36px;
+    overflow-y: auto;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+
+  .page-title span { color: var(--accent); }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(110,231,183,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(110,231,183,0.25);
+  }
+
+  .badge.pulse::before {
+    content: '●';
+    margin-right: 6px;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .stat-card:hover { border-color: rgba(110,231,183,0.3); }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .stat-card:nth-child(1)::before { background: var(--accent); }
+  .stat-card:nth-child(2)::before { background: var(--accent2); }
+  .stat-card:nth-child(3)::before { background: var(--accent3); }
+  .stat-card:nth-child(4)::before { background: var(--accent4); }
+
+  .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-delta {
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  .stat-delta.down { color: var(--danger); }
+
+  /* AGENTS GRID */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .agents-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 32px;
+  }
+
+  .agent-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .agent-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 16px;
+  }
+
+  .agent-card[data-color="green"]::after { background: radial-gradient(circle at top left, rgba(110,231,183,0.05), transparent 60%); }
+  .agent-card[data-color="indigo"]::after { background: radial-gradient(circle at top left, rgba(129,140,248,0.05), transparent 60%); }
+  .agent-card[data-color="pink"]::after { background: radial-gradient(circle at top left, rgba(244,114,182,0.05), transparent 60%); }
+
+  .agent-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,255,255,0.15);
+  }
+
+  .agent-card:hover::after { opacity: 1; }
+
+  .agent-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .agent-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .agent-avatar.green { background: rgba(110,231,183,0.12); border: 1px solid rgba(110,231,183,0.25); }
+  .agent-avatar.indigo { background: rgba(129,140,248,0.12); border: 1px solid rgba(129,140,248,0.25); }
+  .agent-avatar.pink { background: rgba(244,114,182,0.12); border: 1px solid rgba(244,114,182,0.25); }
+  .agent-avatar.gold { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.25); }
+
+  .agent-status {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .agent-status.online {
+    background: rgba(110,231,183,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(110,231,183,0.25);
+  }
+
+  .agent-status.busy {
+    background: rgba(251,191,36,0.1);
+    color: var(--accent4);
+    border: 1px solid rgba(251,191,36,0.25);
+  }
+
+  .agent-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .agent-role {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .agent-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .metric {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+
+  .metric-label { font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+  .metric-value { font-size: 18px; font-weight: 600; font-family: 'Syne', sans-serif; }
+  .metric-value.green { color: var(--accent); }
+  .metric-value.indigo { color: var(--accent2); }
+  .metric-value.pink { color: var(--accent3); }
+  .metric-value.gold { color: var(--accent4); }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  .progress-fill.green { background: var(--accent); }
+  .progress-fill.indigo { background: var(--accent2); }
+  .progress-fill.pink { background: var(--accent3); }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* RUN AGENT BUTTON */
+  .run-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 14px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .run-btn.green {
+    background: rgba(110,231,183,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(110,231,183,0.25);
+  }
+
+  .run-btn.green:hover {
+    background: rgba(110,231,183,0.18);
+    box-shadow: 0 0 20px rgba(110,231,183,0.15);
+  }
+
+  .run-btn.indigo {
+    background: rgba(129,140,248,0.1);
+    color: var(--accent2);
+    border: 1px solid rgba(129,140,248,0.25);
+  }
+
+  .run-btn.indigo:hover { background: rgba(129,140,248,0.18); }
+
+  .run-btn.pink {
+    background: rgba(244,114,182,0.1);
+    color: var(--accent3);
+    border: 1px solid rgba(244,114,182,0.25);
+  }
+
+  .run-btn.pink:hover { background: rgba(244,114,182,0.18); }
+
+  /* BOTTOM SECTION */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+  }
+
+  .panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: var(--text);
+  }
+
+  /* Activity feed */
+  .activity-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .activity-item:last-child { border-bottom: none; }
+
+  .activity-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .activity-text { font-size: 13px; line-height: 1.5; }
+  .activity-text strong { color: var(--text); font-weight: 500; }
+  .activity-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Candidates table */
+  .table-row {
+    display: grid;
+    grid-template-columns: 1fr 100px 80px 80px;
+    gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+    align-items: center;
+  }
+
+  .table-row.header {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding-bottom: 12px;
+  }
+
+  .score-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .score-high { background: rgba(110,231,183,0.12); color: var(--accent); }
+  .score-mid { background: rgba(251,191,36,0.12); color: var(--accent4); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    width: 580px;
+    max-width: 95vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 18px; right: 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .modal-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+  .input-group { margin-bottom: 18px; }
+
+  .input-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .input-field, .textarea-field {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .textarea-field { resize: vertical; min-height: 100px; }
+
+  .input-field:focus, .textarea-field:focus {
+    border-color: rgba(110,231,183,0.4);
+  }
+
+  .modal-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    background: var(--accent);
+    color: #0a0a0f;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .modal-btn:hover {
+    background: #a7f3d0;
+    box-shadow: 0 0 30px rgba(110,231,183,0.3);
+  }
+
+  .modal-btn:disabled {
+    background: var(--surface2);
+    color: var(--muted);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .ai-response {
+    background: var(--surface2);
+    border: 1px solid rgba(110,231,183,0.2);
+    border-radius: 12px;
+    padding: 18px;
+    margin-top: 20px;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    color: var(--text);
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .ai-response.active { display: block; }
+
+  .thinking {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 16px;
+    display: none;
+  }
+
+  .thinking.active { display: flex; }
+
+  .dots span {
+    animation: blink 1.2s infinite;
+    opacity: 0;
+  }
+  .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+
+  .agent-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .agent-chip.green { background: rgba(110,231,183,0.1); color: var(--accent); border: 1px solid rgba(110,231,183,0.25); }
+  .agent-chip.indigo { background: rgba(129,140,248,0.1); color: var(--accent2); border: 1px solid rgba(129,140,248,0.25); }
+  .agent-chip.pink { background: rgba(244,114,182,0.1); color: var(--accent3); border: 1px solid rgba(244,114,182,0.25); }
+
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🚀</div>
+      <div class="logo-text">Talent<span>AI</span></div>
+    </div>
+
+    <nav>
+      <div class="nav-label">Principal</div>
+      <div class="nav-item active">
+        <span>⬡</span> Dashboard
+      </div>
+      <div class="nav-item">
+        <span>◎</span> Candidatos
+      </div>
+      <div class="nav-item">
+        <span>◈</span> Empresas
+      </div>
+
+      <div class="nav-label">Agentes IA</div>
+      <div class="nav-item" onclick="openModal('orchestrator')">
+        <div class="nav-dot" style="background:var(--accent4)"></div> Orquestador
+      </div>
+      <div class="nav-item" onclick="openModal('matcher')">
+        <div class="nav-dot"></div> Agente Matching
+      </div>
+      <div class="nav-item" onclick="openModal('cv')">
+        <div class="nav-dot" style="background:var(--accent2)"></div> Agente CV
+      </div>
+      <div class="nav-item" onclick="openModal('interview')">
+        <div class="nav-dot" style="background:var(--accent3)"></div> Agente Entrevistas
+      </div>
+
+      <div class="nav-label">Reportes</div>
+      <div class="nav-item">
+        <span>▤</span> Análisis
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="label">Agentes activos</div>
+      <div class="value">3 / 4 online</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <div class="topbar">
+      <div>
+        <div class="page-title">Centro de <span>Agentes</span></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px;">Gestión inteligente de talento — hoy, 2 mar 2026</div>
+      </div>
+      <div class="topbar-right">
+        <div class="badge pulse">✨ Gemini Free · activo</div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Candidatos activos</div>
+        <div class="stat-value" style="color:var(--accent)">284</div>
+        <div class="stat-delta">↑ +12 esta semana</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Matches realizados</div>
+        <div class="stat-value" style="color:var(--accent2)">147</div>
+        <div class="stat-delta">↑ +8 hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">CVs mejorados</div>
+        <div class="stat-value" style="color:var(--accent3)">93</div>
+        <div class="stat-delta">↑ +5 hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Tasa de éxito</div>
+        <div class="stat-value" style="color:var(--accent4)">68%</div>
+        <div class="stat-delta">↑ +3% vs mes anterior</div>
+      </div>
+    </div>
+
+    <!-- AGENTS -->
+    <div class="section-header">
+      <div class="section-title">Equipo de Agentes</div>
+      <div style="font-size:12px;color:var(--muted)">Haz clic en un agente para usarlo</div>
+    </div>
+
+    <div class="agents-grid">
+      <!-- Matcher -->
+      <div class="agent-card" data-color="green" onclick="openModal('matcher')">
+        <div class="agent-header">
+          <div class="agent-avatar green">🎯</div>
+          <div class="agent-status online">Online</div>
+        </div>
+        <div class="agent-name">NEXUS</div>
+        <div class="agent-role">Agente de Matching Inteligente</div>
+        <div class="agent-metrics">
+          <div class="metric">
+            <div class="metric-label">Matches hoy</div>
+            <div class="metric-value green">47</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Precisión</div>
+            <div class="metric-value green">91%</div>
+          </div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill green" style="width:91%"></div></div>
+        <div class="progress-label"><span>Precisión del modelo</span><span>91%</span></div>
+        <button class="run-btn green">▶ Ejecutar Matching</button>
+      </div>
+
+      <!-- CV -->
+      <div class="agent-card" data-color="indigo" onclick="openModal('cv')">
+        <div class="agent-header">
+          <div class="agent-avatar indigo">📄</div>
+          <div class="agent-status online">Online</div>
+        </div>
+        <div class="agent-name">FORMA</div>
+        <div class="agent-role">Agente Revisor de CVs</div>
+        <div class="agent-metrics">
+          <div class="metric">
+            <div class="metric-label">CVs revisados</div>
+            <div class="metric-value indigo">93</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Mejora media</div>
+            <div class="metric-value indigo">+42%</div>
+          </div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill indigo" style="width:78%"></div></div>
+        <div class="progress-label"><span>Satisfacción usuarios</span><span>78%</span></div>
+        <button class="run-btn indigo">▶ Analizar CV</button>
+      </div>
+
+      <!-- Interview -->
+      <div class="agent-card" data-color="pink" onclick="openModal('interview')">
+        <div class="agent-header">
+          <div class="agent-avatar pink">🎙️</div>
+          <div class="agent-status busy">Ocupado</div>
+        </div>
+        <div class="agent-name">PULSE</div>
+        <div class="agent-role">Agente de Entrevistas</div>
+        <div class="agent-metrics">
+          <div class="metric">
+            <div class="metric-label">Sesiones hoy</div>
+            <div class="metric-value pink">18</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Tasa aprobación</div>
+            <div class="metric-value pink">73%</div>
+          </div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill pink" style="width:73%"></div></div>
+        <div class="progress-label"><span>Candidatos preparados</span><span>73%</span></div>
+        <button class="run-btn pink">▶ Preparar Entrevista</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM PANELS -->
+    <div class="bottom-grid">
+      <!-- Activity -->
+      <div class="panel">
+        <div class="panel-title">⚡ Actividad en tiempo real</div>
+        <div id="activity-feed">
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent)"></div>
+            <div>
+              <div class="activity-text"><strong>NEXUS</strong> encontró 3 matches para Laura G. — Diseño UX</div>
+              <div class="activity-time">hace 2 min</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent2)"></div>
+            <div>
+              <div class="activity-text"><strong>FORMA</strong> mejoró el CV de Carlos R. — score +55pts</div>
+              <div class="activity-time">hace 8 min</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent3)"></div>
+            <div>
+              <div class="activity-text"><strong>PULSE</strong> preparó entrevista técnica para Ana M. — Google</div>
+              <div class="activity-time">hace 15 min</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent)"></div>
+            <div>
+              <div class="activity-text"><strong>NEXUS</strong> procesó 12 nuevas ofertas de empleo</div>
+              <div class="activity-time">hace 21 min</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent4)"></div>
+            <div>
+              <div class="activity-text"><strong>Sistema</strong> — backup diario completado ✓</div>
+              <div class="activity-time">hace 1 h</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Candidates -->
+      <div class="panel">
+        <div class="panel-title">👥 Top candidatos del día</div>
+        <div class="table-row header">
+          <div>Candidato</div>
+          <div>Rol</div>
+          <div>Match</div>
+          <div>Estado</div>
+        </div>
+        <div class="table-row">
+          <div>Laura García</div>
+          <div style="color:var(--muted);font-size:12px">UX Design</div>
+          <div><span class="score-pill score-high">94%</span></div>
+          <div style="color:var(--accent);font-size:12px">Activo</div>
+        </div>
+        <div class="table-row">
+          <div>Carlos Ruiz</div>
+          <div style="color:var(--muted);font-size:12px">Backend</div>
+          <div><span class="score-pill score-high">89%</span></div>
+          <div style="color:var(--accent);font-size:12px">Activo</div>
+        </div>
+        <div class="table-row">
+          <div>Ana Martínez</div>
+          <div style="color:var(--muted);font-size:12px">PM</div>
+          <div><span class="score-pill score-high">85%</span></div>
+          <div style="color:var(--accent4);font-size:12px">Entrevista</div>
+        </div>
+        <div class="table-row">
+          <div>Diego López</div>
+          <div style="color:var(--muted);font-size:12px">Data</div>
+          <div><span class="score-pill score-mid">71%</span></div>
+          <div style="color:var(--muted);font-size:12px">CV review</div>
+        </div>
+        <div class="table-row">
+          <div>Sofía Pérez</div>
+          <div style="color:var(--muted);font-size:12px">Frontend</div>
+          <div><span class="score-pill score-mid">68%</span></div>
+          <div style="color:var(--muted);font-size:12px">Nuevo</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-close" onclick="closeModal()">✕</div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+const agents = {
+  matcher: {
+    color: 'green',
+    emoji: '🎯',
+    name: 'NEXUS — Agente de Matching',
+    subtitle: 'Encuentra los mejores puestos para un candidato usando IA',
+    fields: [
+      { id: 'nombre', label: 'Nombre del candidato', type: 'input', placeholder: 'Ej: Laura García' },
+      { id: 'perfil', label: 'Perfil profesional (habilidades, experiencia, preferencias)', type: 'textarea', placeholder: 'Ej: Diseñadora UX con 4 años de experiencia en apps móviles, dominio de Figma, inglés B2, busca trabajo remoto en startup...' },
+    ],
+    system: `Eres NEXUS, un agente experto en matching de talento y empleo. Analiza el perfil del candidato y proporciona:
+1. **Top 3 tipos de roles recomendados** con justificación
+2. **Sectores ideales** para ese perfil
+3. **Palabras clave** que debería usar en su búsqueda
+4. **Score de empleabilidad** estimado (0-100) con explicación
+5. **Próximos pasos concretos**
+Sé específico, útil y motivador. Responde en español.`
+  },
+  cv: {
+    color: 'indigo',
+    emoji: '📄',
+    name: 'FORMA — Agente Revisor de CVs',
+    subtitle: 'Analiza y mejora CVs para maximizar las oportunidades',
+    fields: [
+      { id: 'nombre', label: 'Nombre del candidato', type: 'input', placeholder: 'Ej: Carlos Ruiz' },
+      { id: 'cv', label: 'Contenido del CV (pega el texto aquí)', type: 'textarea', placeholder: 'Pega aquí el contenido del CV del candidato...' },
+      { id: 'puesto', label: 'Puesto al que aplica', type: 'input', placeholder: 'Ej: Backend Developer en startup fintech' },
+    ],
+    system: `Eres FORMA, un experto en redacción y optimización de CVs para el mercado laboral actual. Analiza el CV proporcionado y entrega:
+1. **Puntuación actual** del CV (0-100) con desglose por secciones
+2. **Puntos fuertes** del CV actual
+3. **Mejoras críticas** ordenadas por impacto (máx 5)
+4. **Reescritura de 2-3 bullets** como ejemplo de mejora
+5. **Palabras ATS** que debería añadir para el puesto objetivo
+Sé directo y práctico. Responde en español.`
+  },
+  interview: {
+    color: 'pink',
+    emoji: '🎙️',
+    name: 'PULSE — Agente de Entrevistas',
+    subtitle: 'Prepara candidatos para entrevistas con simulaciones y consejos',
+    fields: [
+      { id: 'nombre', label: 'Nombre del candidato', type: 'input', placeholder: 'Ej: Ana Martínez' },
+      { id: 'empresa', label: 'Empresa y puesto', type: 'input', placeholder: 'Ej: Product Manager en Google España' },
+      { id: 'nivel', label: 'Experiencia del candidato', type: 'input', placeholder: 'Ej: 5 años como PM en e-commerce, MBA, etc.' },
+    ],
+    system: `Eres PULSE, un coach experto en preparación de entrevistas de trabajo. Prepara al candidato con:
+1. **5 preguntas más probables** para ese puesto/empresa con respuestas modelo usando el método STAR
+2. **Red flags** a evitar en esa entrevista específica
+3. **3 preguntas inteligentes** que el candidato debería hacer al entrevistador
+4. **Consejo de presentación personal** (elevator pitch de 30 segundos)
+5. **Estado mental y estrategia** para el día de la entrevista
+Sé motivador y muy específico al contexto. Responde en español.`
+  },
+  orchestrator: {
+    color: 'green',
+    emoji: '🧠',
+    name: 'ARIA — Orquestadora del sistema',
+    subtitle: 'Coordina todos los agentes y ejecuta flujos de trabajo completos',
+    fields: [
+      { id: 'tarea', label: '¿Qué necesitas gestionar hoy?', type: 'textarea', placeholder: 'Ej: Tengo 5 nuevos candidatos y necesito procesar todos sus perfiles: hacer matching, revisar sus CVs y preparar entrevistas para los 2 mejores...' },
+    ],
+    system: `Eres ARIA, la orquestadora de un sistema de agentes de IA para una startup de empleo. Cuando el usuario te describe una tarea compleja, debes:
+1. **Analizar la tarea** e identificar qué agentes se necesitan (NEXUS para matching, FORMA para CVs, PULSE para entrevistas)
+2. **Diseñar el flujo de trabajo** paso a paso indicando qué hace cada agente y en qué orden
+3. **Ejecutar el análisis principal** de forma inmediata con los datos disponibles
+4. **Priorizar candidatos** si hay varios, con criterios claros
+5. **Resumen ejecutivo** con métricas y próximas acciones
+Actúa como un director de operaciones inteligente. Responde en español.`
+  }
+};
+
+let currentAgent = null;
+let savedApiKey = '';
+const BACKEND_URL = 'https://TU-SERVIDOR.railway.app'; // ← cambia esto tras el deploy
+
+function openModal(agentKey) {
+  currentAgent = agentKey;
+  const agent = agents[agentKey];
+  const content = document.getElementById('modal-content');
+
+  let fieldsHTML = agent.fields.map(f => `
+    <div class="input-group">
+      <label class="input-label">${f.label}</label>
+      ${f.type === 'textarea'
+        ? `<textarea class="textarea-field" id="field-${f.id}" placeholder="${f.placeholder}"></textarea>`
+        : `<input class="input-field" id="field-${f.id}" type="text" placeholder="${f.placeholder}">`
+      }
+    </div>
+  `).join('');
+
+  content.innerHTML = `
+    <div class="agent-chip ${agent.color}">${agent.emoji} ${agent.name.split('—')[0].trim()}</div>
+    <div class="modal-title">${agent.name.split('—')[1]?.trim() || agent.name}</div>
+    <div class="modal-subtitle">${agent.subtitle}</div>
+
+    ${fieldsHTML}
+    <button class="modal-btn" id="run-btn" onclick="runAgent()">
+      ▶ Ejecutar agente
+    </button>
+    <div class="thinking" id="thinking">
+      <span style="color:var(--accent)">⬡</span>
+      <span>Agente procesando</span>
+      <span class="dots"><span>.</span><span>.</span><span>.</span></span>
+    </div>
+    <div class="ai-response" id="ai-response"></div>
+  `;
+
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+async function runAgent() {
+  const agent = agents[currentAgent];
+  const btn = document.getElementById('run-btn');
+  const thinking = document.getElementById('thinking');
+  const responseEl = document.getElementById('ai-response');
+
+  // Collect field values
+  let userContent = '';
+  for (const f of agent.fields) {
+    const el = document.getElementById(`field-${f.id}`);
+    if (el && el.value.trim()) {
+      userContent += `${f.label}:\n${el.value.trim()}\n\n`;
+    }
+  }
+
+  if (!userContent.trim()) {
+    alert('Por favor completa al menos un campo antes de ejecutar el agente.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Procesando...';
+  thinking.classList.add('active');
+  responseEl.classList.remove('active');
+  responseEl.textContent = '';
+
+  try {
+    const response = await fetch(BACKEND_URL + '/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system: agent.system, user: userContent })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const text = data.text || 'Sin respuesta del modelo.';
+
+    // Render markdown-style bold (**texto**)
+    responseEl.innerHTML = text
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text)">$1</strong>')
+      .replace(/\n/g, '<br>');
+    responseEl.classList.add('active');
+
+    addActivity(agent, text.slice(0, 60) + '...');
+
+  } catch (err) {
+    const msg = err.message || '';
+    if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+      responseEl.innerHTML = `<span style="color:var(--danger)">⚠ No se puede conectar al servidor</span><br><br>
+        El servidor backend no está disponible.<br>
+        Si eres el administrador, verifica que el servidor esté corriendo en <code style="background:var(--surface2);padding:2px 5px;border-radius:4px">${BACKEND_URL}</code>`;
+    } else if (msg.includes('429')) {
+      responseEl.innerHTML = `<span style="color:var(--danger)">⚠ Demasiadas peticiones</span><br><br>Espera un momento e inténtalo de nuevo.`;
+    } else {
+      responseEl.innerHTML = `<span style="color:var(--danger)">⚠ Error: ${msg || 'desconocido'}</span><br><br>Inténtalo de nuevo o contacta al administrador.`;
+    }
+    responseEl.classList.add('active');
+  }
+
+  thinking.classList.remove('active');
+  btn.disabled = false;
+  btn.innerHTML = '✓ Ejecutado — volver a correr';
+}
+
+function addActivity(agent, preview) {
+  const feed = document.getElementById('activity-feed');
+  const colors = { matcher: 'var(--accent)', cv: 'var(--accent2)', interview: 'var(--accent3)', orchestrator: 'var(--accent4)' };
+  const names = { matcher: 'NEXUS', cv: 'FORMA', interview: 'PULSE', orchestrator: 'ARIA' };
+
+  const item = document.createElement('div');
+  item.className = 'activity-item';
+  item.innerHTML = `
+    <div class="activity-dot" style="background:${colors[currentAgent]}"></div>
+    <div>
+      <div class="activity-text"><strong>${names[currentAgent]}</strong> ${preview}</div>
+      <div class="activity-time">ahora mismo</div>
+    </div>
+  `;
+
+  feed.insertBefore(item, feed.firstChild);
+  if (feed.children.length > 6) feed.removeChild(feed.lastChild);
+}
+</script>
+</body>
+</html>
